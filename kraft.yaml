@@ -1,32 +1,58 @@
-specification: '0.5'
+---
+specification: '0.6'
 name: sqlite
 unikraft:
-  version: '0.5'
+  version: staging
   kconfig:
-    - CONFIG_LIBUK9P=y
-    - CONFIG_LIB9PFS=y
     - CONFIG_LIBDEVFS=y
     - CONFIG_LIBDEVFS_AUTOMOUNT=y
     - CONFIG_LIBVFSCORE_AUTOMOUNT_ROOTFS=y
     - CONFIG_LIBVFSCORE_ROOTFS_9PFS=y
     - CONFIG_LIBUKLIBPARAM=y
     - CONFIG_LIBVFSCORE_ROOTDEV="fs0"
+    # Select other options needed by sqlite
     - CONFIG_LIBUKMMAP=y
     - CONFIG_LIBPOSIX_SYSINFO=y
 targets:
   - architecture: x86_64
     platform: kvm
+compartments:
+  - name: comp1
+    mechanism:
+      driver: intel-pku
+    default: true
+  - name: comp2
+    mechanism:
+      driver: intel-pku
+  - name: comp3
+    mechanism:
+      driver: intel-pku
 libraries:
-  pthread-embedded: '0.5'
+  uktime:
+    is_core: true
+    compartment: comp3
+  vfscore:
+    is_core: true
+    compartment: comp2
+  ramfs:
+    is_core: true
+    compartment: comp2
+  cpio:
+    is_core: true
+    compartment: comp2
+  tlsf:
+    version: staging
+    kconfig:
+      - CONFIG_LIBTLSF=y
+  pthread-embedded:
+    version: staging
+    compartment: comp1
   newlib:
-    version: '0.5'
+    version: staging
     kconfig:
       - CONFIG_LIBNEWLIBC=y
+    compartment: comp1
   sqlite:
-    version: '0.5'
+    version: staging
     kconfig:
-      - CONFIG_LIBSQLITE_MAIN_FUNCTION=y
-volumes:
-  fs0:
-    driver: 9pfs
-    source: minrootfs.tgz
+      - CONFIG_LIBSQLITE_MAIN_FUNCTION=n
